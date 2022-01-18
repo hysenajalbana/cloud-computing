@@ -9,28 +9,26 @@ router.post('/create-user', validate(authValidation.register), authController.re
 router.post('/create-group', validate(authValidation.createGroup), authController.createGroup);
 router.post('/add-user-to-group', validate(authValidation.addUserToGroup), authController.addUserToGroup);
 router.post('/attach-group-policy', validate(authValidation.attachGroupPolicy), authController.attachGroupPolicy);
-//router.post('/attach-user-policy', validate(authValidation.logout), authController.logout);
-//router.post('/refresh-tokens', validate(authValidation.refreshTokens), authController.refreshTokens);
-//router.post('/change-password', validate(authValidation.forgotPassword), authController.forgotPassword);
-/* router.post('/reset-password', validate(authValidation.resetPassword), authController.resetPassword);
-router.post('/send-verification-email', auth(), authController.sendVerificationEmail);
-router.post('/verify-email', validate(authValidation.verifyEmail), authController.verifyEmail);
- */
+router.post('/attach-user-policy', validate(authValidation.attachUserPolicy), authController.attachUserPolicy);
+router.post('/rcreate-role', authController.createRole);
+router.post('/create-policy', authController.createPolicy);
+router.post('/create-login-profile', authController.createLoginProfile);
+
 module.exports = router;
 
 /**
  * @swagger
  * tags:
- *   name: Auth
+ *   name: AWSS
  *   description: Authentication
  */
 
 /**
  * @swagger
- * /auth/register:
+ * /aws/create-user:
  *   post:
- *     summary: Register as user
- *     tags: [Auth]
+ *     summary: Create AWS User
+ *     tags: [AWS]
  *     requestBody:
  *       required: true
  *       content:
@@ -38,25 +36,12 @@ module.exports = router;
  *           schema:
  *             type: object
  *             required:
- *               - name
- *               - email
- *               - password
+ *               - username
  *             properties:
  *               name:
  *                 type: string
- *               email:
- *                 type: string
- *                 format: email
- *                 description: must be unique
- *               password:
- *                 type: string
- *                 format: password
- *                 minLength: 8
- *                 description: At least one number and one letter
  *             example:
- *               name: fake name
- *               email: fake@example.com
- *               password: password1
+ *               username: fake name
  *     responses:
  *       "201":
  *         description: Created
@@ -67,18 +52,16 @@ module.exports = router;
  *               properties:
  *                 user:
  *                   $ref: '#/components/schemas/User'
- *                 tokens:
- *                   $ref: '#/components/schemas/AuthTokens'
  *       "400":
  *         $ref: '#/components/responses/DuplicateEmail'
  */
 
 /**
  * @swagger
- * /auth/login:
+ * /aws/create-group:
  *   post:
- *     summary: Login
- *     tags: [Auth]
+ *     summary: Create AWS group
+ *     tags: [AWS]
  *     requestBody:
  *       required: true
  *       content:
@@ -86,18 +69,12 @@ module.exports = router;
  *           schema:
  *             type: object
  *             required:
- *               - email
- *               - password
+ *               - groupName
  *             properties:
- *               email:
+ *               groupName:
  *                 type: string
- *                 format: email
- *               password:
- *                 type: string
- *                 format: password
  *             example:
- *               email: fake@example.com
- *               password: password1
+ *               groupName: gourpName
  *     responses:
  *       "200":
  *         description: OK
@@ -108,8 +85,6 @@ module.exports = router;
  *               properties:
  *                 user:
  *                   $ref: '#/components/schemas/User'
- *                 tokens:
- *                   $ref: '#/components/schemas/AuthTokens'
  *       "401":
  *         description: Invalid email or password
  *         content:
@@ -123,10 +98,10 @@ module.exports = router;
 
 /**
  * @swagger
- * /auth/logout:
+ * /aws/add-user-to-group:
  *   post:
- *     summary: Logout
- *     tags: [Auth]
+ *     summary: Add user to a group
+ *     tags: [AWS]
  *     requestBody:
  *       required: true
  *       content:
@@ -134,12 +109,13 @@ module.exports = router;
  *           schema:
  *             type: object
  *             required:
- *               - refreshToken
+ *               - groupName
+ *               - userName
  *             properties:
- *               refreshToken:
+ *               groupName:
  *                 type: string
- *             example:
- *               refreshToken: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiI1ZWJhYzUzNDk1NGI1NDEzOTgwNmMxMTIiLCJpYXQiOjE1ODkyOTg0ODQsImV4cCI6MTU4OTMwMDI4NH0.m1U63blB0MLej_WfB7yC2FTMnCziif9X8yzwDEfJXAg
+ *               userName:
+ *                 type: string
  *     responses:
  *       "204":
  *         description: No content
@@ -149,10 +125,10 @@ module.exports = router;
 
 /**
  * @swagger
- * /auth/refresh-tokens:
+ * /auth/attach-group-policy:
  *   post:
- *     summary: Refresh auth tokens
- *     tags: [Auth]
+ *     summary: Attach premission to a group
+ *     tags: [AWS]
  *     requestBody:
  *       required: true
  *       content:
@@ -160,12 +136,13 @@ module.exports = router;
  *           schema:
  *             type: object
  *             required:
- *               - refreshToken
+ *               - groupName
+ *               - policyArn
  *             properties:
- *               refreshToken:
+ *               groupName:
  *                 type: string
- *             example:
- *               refreshToken: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiI1ZWJhYzUzNDk1NGI1NDEzOTgwNmMxMTIiLCJpYXQiOjE1ODkyOTg0ODQsImV4cCI6MTU4OTMwMDI4NH0.m1U63blB0MLej_WfB7yC2FTMnCziif9X8yzwDEfJXAg
+ *               policyArn:
+ *                 type: string
  *     responses:
  *       "200":
  *         description: OK

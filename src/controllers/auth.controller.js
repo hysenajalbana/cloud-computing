@@ -6,7 +6,11 @@ const {
   CreateUserCommand, 
   AddUserToGroupCommand,
   CreateGroupCommand,
-  AttachGroupPolicyCommand
+  AttachGroupPolicyCommand,
+  AttachUserPolicyCommand,
+  CreateRoleCommand,
+  CreatePolicyCommand,
+  CreateLoginProfileCommand
 } = require("@aws-sdk/client-iam");
 const { authService, userService, tokenService, emailService } = require('../services');
 
@@ -69,36 +73,71 @@ const attachGroupPolicy = catchAsync(async (req, res) => {
     res.send({ data});
 });
 
-const logout = catchAsync(async (req, res) => {
-  await authService.logout(req.body.refreshToken);
-  res.status(httpStatus.NO_CONTENT).send();
+const attachUserPolicy = catchAsync(async (req, res) => {
+  const { username, policyArn } = req.body;
+
+  const params = {
+    /** input parameters */
+    UserName: username,
+    PolicyArn: policyArn
+  };
+  const command = new AttachUserPolicyCommand(params);
+
+    const data = await client.send(command);
+
+    res.send({ data});
 });
 
-const refreshTokens = catchAsync(async (req, res) => {
-  const tokens = await authService.refreshAuth(req.body.refreshToken);
-  res.send({ ...tokens });
+const createRole = catchAsync(async (req, res) => {
+  const { assumeRolePolicyDocument, path, roleName } = req.body;
+
+  const params = {
+    /** input parameters */
+    AssumeRolePolicyDocument: assumeRolePolicyDocument,
+    Path: path,
+    RoleName: roleName
+  };
+  const command = new CreateRoleCommand(params);
+
+    const data = await client.send(command);
+
+    res.send({ data});
 });
 
-const forgotPassword = catchAsync(async (req, res) => {
-  const resetPasswordToken = await tokenService.generateResetPasswordToken(req.body.email);
-  await emailService.sendResetPasswordEmail(req.body.email, resetPasswordToken);
-  res.status(httpStatus.NO_CONTENT).send();
+const createPolicy = catchAsync(async (req, res) => {
+
+  const { policyDocument, policyName, tags } = req.body;
+
+  const params = {
+    /** input parameters */
+    PolicyDocument: policyDocument,
+    PolicyName: policyName,
+    Tags: tags
+  };
+
+  const command = new CreatePolicyCommand(params);
+
+    const data = await client.send(command);
+
+    res.send({ data});
 });
 
-const resetPassword = catchAsync(async (req, res) => {
-  await authService.resetPassword(req.query.token, req.body.password);
-  res.status(httpStatus.NO_CONTENT).send();
-});
 
-const sendVerificationEmail = catchAsync(async (req, res) => {
-  const verifyEmailToken = await tokenService.generateVerifyEmailToken(req.user);
-  await emailService.sendVerificationEmail(req.user.email, verifyEmailToken);
-  res.status(httpStatus.NO_CONTENT).send();
-});
+const createLoginProfile = catchAsync(async (req, res) => {
 
-const verifyEmail = catchAsync(async (req, res) => {
-  await authService.verifyEmail(req.query.token);
-  res.status(httpStatus.NO_CONTENT).send();
+  const { password, passwordRestRequired, username } = req.body;
+
+  var params = {
+    Password: password, 
+    PasswordResetRequired: passwordRestRequired, 
+    UserName: username
+   };
+
+  const command = new CreateLoginProfileCommand(params);
+
+    const data = await client.send(command);
+
+    res.send({ data});
 });
 
 module.exports = {
@@ -106,9 +145,8 @@ module.exports = {
   addUserToGroup,
   createGroup,
   attachGroupPolicy,
-  refreshTokens,
-  forgotPassword,
-  resetPassword,
-  sendVerificationEmail,
-  verifyEmail,
+  attachUserPolicy,
+  createRole,
+  createPolicy,
+  createLoginProfile
 };

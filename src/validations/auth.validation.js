@@ -27,6 +27,13 @@ const attachGroupPolicy = {
   }),
 };
 
+const attachUserPolicy = {
+  body: Joi.object().keys({
+    username: Joi.string().required(),
+    policyArn: Joi.string().required(),
+  }),
+};
+
 const logout = {
   body: Joi.object().keys({
     refreshToken: Joi.string().required(),
@@ -65,6 +72,7 @@ module.exports = {
   addUserToGroup,
   createGroup,
   attachGroupPolicy,
+  attachUserPolicy,
   refreshTokens,
   forgotPassword,
   resetPassword,
